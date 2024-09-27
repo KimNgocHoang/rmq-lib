@@ -27,6 +27,7 @@ let RmqModule = RmqModule_1 = class RmqModule {
                         useFactory: (configService) => {
                             const urlName = configService.get("RMQ");
                             const queueName = configService.get("RMQ_WS");
+                            console.log("urlName: ", urlName);
                             return {
                                 transport: microservices_1.Transport.RMQ,
                                 options: {

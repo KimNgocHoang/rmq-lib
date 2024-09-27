@@ -28,6 +28,7 @@ export class RmqModule {
 
               const urlName = configService.get("RMQ");
               const queueName = configService.get("RMQ_WS");
+              console.log("urlName: ", urlName);
 
               return {
                 transport: Transport.RMQ,
