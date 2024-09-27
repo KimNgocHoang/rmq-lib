@@ -1,11 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
-import { RABBITMQ_KEY } from './key-service';
-import { DF_NAME } from './rmq.module';
+import { Inject, Injectable } from "@nestjs/common";
+import { ClientProxy } from "@nestjs/microservices";
+import { lastValueFrom } from "rxjs";
+import { RABBITMQ_KEY } from "./key-service";
 
 const CmdPatterns = {
-  test: 'test',
+  test: "test",
 } as const;
 
 interface CommandData {
@@ -23,11 +22,10 @@ export class RmqService {
   private queue: Record<string, ClientProxy>;
   constructor(
     @Inject(RABBITMQ_KEY.ws.key) private readonly clientWS: ClientProxy,
-    @Inject(RABBITMQ_KEY.chatai.key) private readonly clientChatAI: ClientProxy,
-
-    // @Inject('RABBITMQ_WS_CONNECTION') private readonly clientWS: ClientProxy,
-    // @Inject(DF_NAME) private readonly clientChatAI: ClientProxy,
-  ) {
+    @Inject(RABBITMQ_KEY.chatai.key) private readonly clientChatAI: ClientProxy
+  ) // @Inject('RABBITMQ_WS_CONNECTION') private readonly clientWS: ClientProxy,
+  // @Inject(DF_NAME) private readonly clientChatAI: ClientProxy,
+  {
     this.queue = {
       clientWS: this.clientWS,
       clientChatAI: this.clientChatAI,
@@ -40,25 +38,22 @@ export class RmqService {
   }
 
   // Hàm send với lựa chọn client và cmd tương ứng
-  public async sendMsg<
-    ClientType extends keyof CommandDataMap,
-    CmdType extends keyof CommandDataMap[ClientType],
-  >(
+  public async sendMsg<ClientType extends keyof CommandDataMap, CmdType extends keyof CommandDataMap[ClientType]>(
     clientType: ClientType, // chọn loại client
     pattern: { cmd: CmdType },
-    data: CommandDataMap[ClientType][CmdType],
+    data: CommandDataMap[ClientType][CmdType]
   ): Promise<any> {
     try {
-      console.log('instanceID:', this.getInstanceId());
-      console.log('clientType:', clientType);
+      console.log("instanceID:", this.getInstanceId());
+      console.log("clientType:", clientType);
 
       const client = this.queue[clientType];
       if (!client) {
-        throw new Error('Client không hợp lệ');
+        throw new Error("Client không hợp lệ");
       }
       return await lastValueFrom(client.send(pattern, data));
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     }
   }
 }

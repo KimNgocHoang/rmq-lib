@@ -18,7 +18,7 @@ const microservices_1 = require("@nestjs/microservices");
 const rxjs_1 = require("rxjs");
 const key_service_1 = require("./key-service");
 const CmdPatterns = {
-    test: 'test',
+    test: "test",
 };
 let RmqService = class RmqService {
     constructor(clientWS, clientChatAI) {
@@ -35,16 +35,16 @@ let RmqService = class RmqService {
     }
     async sendMsg(clientType, pattern, data) {
         try {
-            console.log('instanceID:', this.getInstanceId());
-            console.log('clientType:', clientType);
+            console.log("instanceID:", this.getInstanceId());
+            console.log("clientType:", clientType);
             const client = this.queue[clientType];
             if (!client) {
-                throw new Error('Client không hợp lệ');
+                throw new Error("Client không hợp lệ");
             }
             return await (0, rxjs_1.lastValueFrom)(client.send(pattern, data));
         }
         catch (error) {
-            console.error('Error sending message:', error);
+            console.error("Error sending message:", error);
         }
     }
 };

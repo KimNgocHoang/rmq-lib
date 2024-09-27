@@ -5,15 +5,13 @@ import { OptionsConfig, OptionsConfigAsync, OptionsConfigFactory } from "./optio
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { RABBITMQ_KEY } from "./key-service";
 
-export const DF_NAME = "RABBITMQ_CHATAI_CONNECTION";
+const DEFAULT_RMQ_HOST_NAME = "amqp://localhost";
+const DEFAULT_RMQ_POST = "5672";
 
 @Global()
 @Module({})
 export class RmqModule {
-  private static rootConfig: OptionsConfig;
-
   static forRootAsync(config: OptionsConfig): DynamicModule {
-    this.rootConfig = config;
     return {
       module: RmqModule,
       imports: [
@@ -22,20 +20,11 @@ export class RmqModule {
             imports: [ConfigModule],
             name: RABBITMQ_KEY.ws.key,
             useFactory: (configService: ConfigService) => {
-              // const urlName = `${config.RMQ_HOST || configService.get('RMQ_HOST')}:${
-              //   config.RMQ_PORT || configService.get('RMQ_PORT')
-              // }`;
-
-              const urlName = configService.get("RMQ");
-              const queueName = configService.get("RMQ_WS");
-              console.log("urlName: ", urlName);
-
               return {
                 transport: Transport.RMQ,
                 options: {
-                  urls: [urlName],
-                  // urls: ['amqp://guess:guess@localhost:5672'],
-                  queue: queueName,
+                  urls: [`${DEFAULT_RMQ_HOST_NAME}:${DEFAULT_RMQ_POST}`],
+                  queue: RABBITMQ_KEY.ws.name,
                   noAck: true,
                   queueOptions: {
                     durable: true,
@@ -54,20 +43,11 @@ export class RmqModule {
             imports: [ConfigModule],
             name: RABBITMQ_KEY.chatai.key,
             useFactory: (configService: ConfigService) => {
-              // const urlName = `${config.RMQ_HOST || configService.get('RMQ_HOST')}:${
-              //   config.RMQ_PORT || configService.get('RMQ_PORT')
-              // }`;
-
-              const urlName = configService.get("RMQ");
-              const queueName = configService.get("RMQ_CHATAI");
-
               return {
                 transport: Transport.RMQ,
                 options: {
-                  // urls: ['amqp://guess:guess@localhost:5672'],
-                  urls: [urlName],
-
-                  queue: queueName,
+                  urls: [`${DEFAULT_RMQ_HOST_NAME}:${DEFAULT_RMQ_POST}`],
+                  queue: RABBITMQ_KEY.chatai.name,
                   noAck: true,
                   queueOptions: {
                     durable: true,
@@ -126,33 +106,33 @@ export class RmqModule {
   //   };
   // }
 
-  private static createProviders(options: OptionsConfigAsync): Provider[] {
-    if (options.useExisting || options.useFactory) {
-      return [this.createOptionsProvider(options)];
-    }
-    return [
-      this.createOptionsProvider(options),
-      {
-        provide: options.useClass,
-        useClass: options.useClass,
-      },
-    ];
-  }
+  // private static createProviders(options: OptionsConfigAsync): Provider[] {
+  //   if (options.useExisting || options.useFactory) {
+  //     return [this.createOptionsProvider(options)];
+  //   }
+  //   return [
+  //     this.createOptionsProvider(options),
+  //     {
+  //       provide: options.useClass,
+  //       useClass: options.useClass,
+  //     },
+  //   ];
+  // }
 
-  private static createOptionsProvider(options: OptionsConfigAsync): Provider {
-    if (options.useFactory) {
-      return {
-        provide: DF_NAME,
-        useFactory: options.useFactory,
-        inject: options.inject || [],
-      };
-    }
-    return {
-      provide: DF_NAME,
-      useFactory: async (optionsFactory: OptionsConfigFactory) => await optionsFactory.createOptionsConfig(),
-      inject: [options.useExisting || options.useClass],
-    };
-  }
+  // private static createOptionsProvider(options: OptionsConfigAsync): Provider {
+  //   if (options.useFactory) {
+  //     return {
+  //       provide: DF_NAME,
+  //       useFactory: options.useFactory,
+  //       inject: options.inject || [],
+  //     };
+  //   }
+  //   return {
+  //     provide: DF_NAME,
+  //     useFactory: async (optionsFactory: OptionsConfigFactory) => await optionsFactory.createOptionsConfig(),
+  //     inject: [options.useExisting || options.useClass],
+  //   };
+  // }
 
   // static register(config: OptionsConfig): DynamicModule {
   //   return {
